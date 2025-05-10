@@ -4,11 +4,13 @@ import math
 import time
 
 class PacMan:
-    def __init__(self, x, y, canvas, cell_size):
+    def __init__(self, x, y, canvas, cell_size, offset_x, offset_y):
         self.x = x
         self.y = y
         self.canvas = canvas
         self.cell_size = cell_size
+        self.offset_x = offset_x
+        self.offset_y = offset_y
         self.direction = "right"
         self.next_direction = "right"
         self.speed = 2
@@ -24,8 +26,8 @@ class PacMan:
         if self.id:
             self.canvas.delete(self.id)
         
-        x = self.x * self.cell_size + self.cell_size // 2
-        y = self.y * self.cell_size + self.cell_size // 2
+        x = self.offset_x + self.x * self.cell_size + self.cell_size // 2
+        y = self.offset_y + self.y * self.cell_size + self.cell_size // 2
         radius = self.cell_size // 2 - 2
         
         start_angle = 0
@@ -103,18 +105,21 @@ class PacMan:
             self.powered = False
 
 class Ghost:
-    def __init__(self, x, y, canvas, cell_size, color, name):
+    def __init__(self, x, y, canvas, cell_size, color, name, offset_x, offset_y):
         self.x = x
         self.y = y
         self.start_x = x
         self.start_y = y
         self.canvas = canvas
         self.cell_size = cell_size
+        self.offset_x = offset_x
+        self.offset_y = offset_y
         self.color = color
         self.name = name
         self.direction = random.choice(["right", "left", "up", "down"])
         self.speed = 1
         self.id = None
+        self.eye_ids = []
         self.scared = False
         self.returning = False
         self.draw()
@@ -122,9 +127,12 @@ class Ghost:
     def draw(self):
         if self.id:
             self.canvas.delete(self.id)
+            for eye_id in self.eye_ids:
+                self.canvas.delete(eye_id)
+            self.eye_ids = []
         
-        x = self.x * self.cell_size + self.cell_size // 2
-        y = self.y * self.cell_size + self.cell_size // 2
+        x = self.offset_x + self.x * self.cell_size + self.cell_size // 2
+        y = self.offset_y + self.y * self.cell_size + self.cell_size // 2
         radius = self.cell_size // 2 - 2
         
         if self.scared:
@@ -157,18 +165,20 @@ class Ghost:
             eye_y_offset = 0
         
         # Left eye
-        self.canvas.create_oval(
+        left_eye = self.canvas.create_oval(
             x - eye_radius - eye_x_offset, y - eye_radius - eye_y_offset,
             x + eye_radius - eye_x_offset, y + eye_radius - eye_y_offset,
             fill="white", outline="white"
         )
+        self.eye_ids.append(left_eye)
         
         # Right eye
-        self.canvas.create_oval(
+        right_eye = self.canvas.create_oval(
             x - eye_radius + eye_x_offset, y - eye_radius - eye_y_offset,
             x + eye_radius + eye_x_offset, y + eye_radius - eye_y_offset,
             fill="white", outline="white"
         )
+        self.eye_ids.append(right_eye)
         
         # Pupils
         pupil_radius = eye_radius // 2
@@ -188,22 +198,24 @@ class Ghost:
             pupil_y_offset = pupil_offset
         
         # Left pupil
-        self.canvas.create_oval(
+        left_pupil = self.canvas.create_oval(
             x - pupil_radius - eye_x_offset + pupil_x_offset, 
             y - pupil_radius - eye_y_offset + pupil_y_offset,
             x + pupil_radius - eye_x_offset + pupil_x_offset, 
             y + pupil_radius - eye_y_offset + pupil_y_offset,
             fill="black", outline="black"
         )
+        self.eye_ids.append(left_pupil)
         
         # Right pupil
-        self.canvas.create_oval(
+        right_pupil = self.canvas.create_oval(
             x - pupil_radius + eye_x_offset + pupil_x_offset, 
             y - pupil_radius - eye_y_offset + pupil_y_offset,
             x + pupil_radius + eye_x_offset + pupil_x_offset, 
             y + pupil_radius - eye_y_offset + pupil_y_offset,
             fill="black", outline="black"
         )
+        self.eye_ids.append(right_pupil)
     
     def move(self, grid, pacman):
         if self.returning and self.x == self.start_x and self.y == self.start_y:
@@ -445,7 +457,11 @@ class GameController:
         
         # Find a valid starting position for Pac-Man
         pacman_start_x, pacman_start_y = self.find_valid_position()
-        self.pacman = PacMan(pacman_start_x, pacman_start_y, self.canvas, self.board.cell_size)
+        self.pacman = PacMan(
+            pacman_start_x, pacman_start_y, 
+            self.canvas, self.board.cell_size,
+            self.board.offset_x, self.board.offset_y
+        )
         
         # Create ghosts
         self.ghosts = []
@@ -455,7 +471,14 @@ class GameController:
         # Find valid starting positions for ghosts
         for i in range(4):
             ghost_x, ghost_y = self.find_valid_position()
-            self.ghosts.append(Ghost(ghost_x, ghost_y, self.canvas, self.board.cell_size, ghost_colors[i], ghost_names[i]))
+            self.ghosts.append(
+                Ghost(
+                    ghost_x, ghost_y, 
+                    self.canvas, self.board.cell_size, 
+                    ghost_colors[i], ghost_names[i],
+                    self.board.offset_x, self.board.offset_y
+                )
+            )
         
         self.score = 0
         self.score_text = self.canvas.create_text(
@@ -479,6 +502,7 @@ class GameController:
         self.game_over = False
         self.game_won = False
         self.paused = False
+        self.update_id = None
         
         # Create pause button
         self.pause_button = tk.Button(
@@ -546,8 +570,11 @@ class GameController:
                 return x, y
     
     def update(self):
-        if self.game_over or self.game_won or self.paused:
-            self.root.after(100, self.update)
+        if self.game_over or self.game_won:
+            return
+        
+        if self.paused:
+            self.update_id = self.root.after(100, self.update)
             return
         
         current_time = time.time()
@@ -611,9 +638,14 @@ class GameController:
             self.show_victory()
         
         # Schedule the next update
-        self.root.after(100, self.update)
+        self.update_id = self.root.after(100, self.update)
     
     def show_game_over(self):
+        # Cancel any pending after callbacks
+        if self.update_id:
+            self.root.after_cancel(self.update_id)
+            self.update_id = None
+            
         # Create a semi-transparent overlay
         overlay = self.canvas.create_rectangle(
             0, 0, self.width, self.height,
@@ -665,7 +697,7 @@ class GameController:
             fg="white",
             activebackground="#555555",
             activeforeground="white",
-            command=self.root.destroy
+            command=self.quit_game
         )
         quit_button_window = self.canvas.create_window(
             self.width // 2, 2 * self.height // 3 + 30,
@@ -673,6 +705,11 @@ class GameController:
         )
     
     def show_victory(self):
+        # Cancel any pending after callbacks
+        if self.update_id:
+            self.root.after_cancel(self.update_id)
+            self.update_id = None
+            
         # Create a semi-transparent overlay
         overlay = self.canvas.create_rectangle(
             0, 0, self.width, self.height,
@@ -724,7 +761,7 @@ class GameController:
             fg="white",
             activebackground="#555555",
             activeforeground="white",
-            command=self.root.destroy
+            command=self.quit_game
         )
         quit_button_window = self.canvas.create_window(
             self.width // 2, 2 * self.height // 3 + 30,
@@ -732,10 +769,23 @@ class GameController:
         )
     
     def restart_game(self):
+        # Cancel any pending after callbacks
+        if self.update_id:
+            self.root.after_cancel(self.update_id)
+            self.update_id = None
+            
+        # Clean up and restart
         self.root.destroy()
-        root = tk.Tk()
-        game = GameController(root)
-        root.mainloop()
+        new_root = tk.Tk()
+        new_game = GameController(new_root)
+        new_root.mainloop()
+    
+    def quit_game(self):
+        # Cancel any pending after callbacks
+        if self.update_id:
+            self.root.after_cancel(self.update_id)
+            self.update_id = None
+        self.root.destroy()
 
 class StartScreen:
     def __init__(self, root):
@@ -853,11 +903,11 @@ class StartScreen:
     
     def start_game(self):
         self.root.destroy()
-        root = tk.Tk()
-        game = GameController(root)
-        root.mainloop()
+        new_root = tk.Tk()
+        game = GameController(new_root)
+        new_root.mainloop()
 
 if __name__ == "__main__":
     root = tk.Tk()
     start_screen = StartScreen(root)
-    root.mainloop() 
+    root.mainloop()
