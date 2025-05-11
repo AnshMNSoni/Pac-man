@@ -33,29 +33,23 @@ A classic **Pac-Man** game clone built using **Python** and **Tkinter GUI**. Nav
    ```bash
    python pacman.py
 
-🎮 Controls
-Arrow Keys - Move Pac-Man (Up, Down, Left, Right)
+## 🎮 Controls
+- Arrow Keys - Move Pac-Man (Up, Down, Left, Right)
 
-📷 Screenshots
+## 📷 Screenshots
+#### Preview
+![image](https://github.com/user-attachments/assets/227fb8a6-5388-464b-a005-fb97a1566207)
 
-📁 Project Structure
-pac-man/
-│
-├── assets/            # Images, sounds (optional)
-├── pacman.py          # Main game script
-├── README.md
-└── requirements.txt   # (Optional) List of dependencies
+#### Preview
+![image](https://github.com/user-attachments/assets/462a6d7f-7220-4e28-b609-a42087a7b4b6)
 
-🚀 Future Improvements
-Add sound effects and background music
+## 🚀 Future Improvements
+- Add sound effects and background music
+- Implement level progression
+- Enhance ghost AI with smarter pathfinding
+- Add pause/resume functionality
 
-Implement level progression
-
-Enhance ghost AI with smarter pathfinding
-
-Add pause/resume functionality
-
-🙋‍♂️ Author
+## 🙋‍♂️ Author
 Ansh Soni
 LinkedIn | GitHub
 
