@@ -50,7 +50,12 @@ A classic **Pac-Man** game clone built using **Python** and **Tkinter GUI**. Nav
 - Add pause/resume functionality
 
 ## 🙋‍♂️ Author
-Ansh Soni
-LinkedIn | GitHub
+**Ansh Soni**
 
-⭐ Don't forget to star the repo if you like it!
+### 🔗 Connect with Me:
+`GitHub` - [Visit](https://github.com/AnshMNSoni) </br>
+`LinkedIn` - [Visit](https://linkedin.com/in/anshsoni)
+
+### ⭐ Don't forget to star the repo if you like it!
+
+## Thankyou 😀<br/>
