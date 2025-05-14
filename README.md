@@ -1,6 +1,6 @@
 # 🟡 Pac-Man Game 🎮
 
-A classic **Pac-Man** game clone built using **Python** and **Tkinter GUI**. Navigate through the maze, collect all the pellets, avoid the ghosts, and enjoy this nostalgic arcade experience right on your desktop!
+#### A classic **Pac-Man** game clone built using **Python** and **Tkinter GUI**. Navigate through the maze, collect all the pellets, avoid the ghosts, and enjoy this nostalgic arcade experience right on your desktop!
 
 ---
 
